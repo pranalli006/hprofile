@@ -8,36 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout Code
-      - name: Code checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # Setup Java FIRST (before Maven)
-      - name: Set Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
           cache: maven
 
-      # Run Tests
-      - name: Maven test
-        run: mvn test
-
-      # Run Checkstyle
-      - name: Checkstyle
-        run: mvn checkstyle:checkstyle
-
-      # Setup Sonar Scanner
-      - name: Setup SonarQube
-        uses: warchant/setup-sonar-scanner@v8
-
-      # Run Sonar Scan
-      - name: SonarQube Scan
-        run: |
-          sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.sources=.
+      - name: Build + Test + Sonar
+        run: mvn clean verify sonar:sonar \
+              -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+              -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+              -Dsonar.host.url=https://sonarcloud.io \
+              -Dsonar.token=${{ secrets.SONAR_TOKEN }}
